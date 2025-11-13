@@ -462,23 +462,25 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
               <div className="flex items-center gap-4">
-                <h1
-                  className={`text-2xl md:text-3xl font-semibold tracking-tight ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-900'
-                  }`}
-                >
-                  {selectedHierarchy &&
-                  selectedHierarchy.id !== selectedHierarchy.name
-                    ? `${selectedHierarchy.name} Dashboard`
-                    : selectedDevice
-                    ? `Device ${
-                        selectedDevice.serial_number ||
-                        selectedDevice.deviceSerial
-                      } Dashboard`
-                    : 'Production Dashboard'}
-                </h1>
+                <div>
+                  <h1
+                    className={`text-2xl md:text-3xl font-semibold tracking-tight ${
+                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    }`}
+                  >
+                    {selectedHierarchy &&
+                    selectedHierarchy.id !== selectedHierarchy.name
+                      ? `${selectedHierarchy.name} Dashboard`
+                      : selectedDevice
+                      ? `Device ${
+                          selectedDevice.serial_number ||
+                          selectedDevice.deviceSerial
+                        } Dashboard`
+                      : 'Production Dashboard'}
+                  </h1>
+                </div>
                 {isLoading && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 ml-4">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
                     <span
                       className={`text-sm ${
@@ -496,7 +498,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                   <motion.button
                     onClick={() => setShowAddWidgetModal(true)}
                     whileTap={{ scale: 0.95 }}
-                    className={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-sm font-medium transition-colors ${
+                    className={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-sm font-medium transition-all hover:shadow-md ${
                       theme === 'dark'
                         ? 'bg-blue-600 text-white hover:bg-blue-700'
                         : 'bg-blue-500 text-white hover:bg-blue-600'
@@ -519,9 +521,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                   <motion.button
                     onClick={() => setEditMode(!editMode)}
                     whileTap={{ scale: 0.95 }}
-                    className={`px-3 md:px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
+                    className={`px-3 md:px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:shadow-md ${
                       editMode
-                        ? 'bg-green-600 text-white hover:bg-green-700'
+                        ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-600/30'
                         : theme === 'dark'
                         ? 'bg-[#162345] text-white hover:bg-[#1f2d4d]'
                         : 'bg-white border border-gray-300 text-gray-800 hover:bg-gray-100'
@@ -535,16 +537,19 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
             {/* Canvas Container */}
             {widgetsLoaded ? (
-              <div
+              <motion.div
                 className={`rounded-lg transition-all duration-300 ${
                   editMode
                     ? `border-2 border-dashed p-4 md:p-6 ${
                         theme === 'dark'
-                          ? 'border-blue-500/50 bg-blue-500/5'
-                          : 'border-blue-400 bg-blue-50/30'
+                          ? 'border-[#6872DB] border-opacity-50 bg-[#6872DB] bg-opacity-5'
+                          : 'border-[#6872DB] border-opacity-40 bg-[#6872DB] bg-opacity-3'
                       }`
                     : 'p-0'
                 }`}
+                initial={false}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
               >
                 {widgets.length > 0 ? (
                   <div style={{ width: '100%' }}>
@@ -582,7 +587,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                       <motion.button
                         onClick={() => setShowAddWidgetModal(true)}
                         whileTap={{ scale: 0.95 }}
-                        className={`mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors ${
+                        className={`mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-all hover:shadow-md ${
                           theme === 'dark'
                             ? 'bg-blue-600 text-white hover:bg-blue-700'
                             : 'bg-blue-500 text-white hover:bg-blue-600'
@@ -594,7 +599,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                     )}
                   </div>
                 )}
-              </div>
+              </motion.div>
             ) : null}
 
             {/* Version Info */}

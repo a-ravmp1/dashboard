@@ -107,10 +107,10 @@ const FlowRateChart: React.FC<SingleFlowRateChartProps> = ({
 
   return (
     <div
-      className={`rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 ${
+      className={`rounded-lg p-4 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${
         theme === 'dark'
-          ? 'bg-[#162345] border border-gray-700/30'
-          : 'bg-white border border-gray-200'
+          ? 'bg-[#162345] border border-gray-700/30 hover:border-gray-600/50'
+          : 'bg-white border border-gray-200 hover:border-gray-300'
       }`}
     >
       <div className="flex items-center justify-between mb-4">

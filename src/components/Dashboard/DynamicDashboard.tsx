@@ -178,12 +178,13 @@ const DynamicDashboard: React.FC<DynamicDashboardProps> = ({
               }}
             >
               {isEditable && (
-                <div className="drag-handle absolute top-0 left-0 right-0 h-7 bg-gradient-to-r from-blue-500 to-blue-600 bg-opacity-90 cursor-move flex items-center justify-center z-10 group hover:bg-opacity-100 transition-all">
-                  <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                    <div className="w-1 h-3 bg-white rounded"></div>
-                    <div className="w-1 h-3 bg-white rounded"></div>
-                    <div className="w-1 h-3 bg-white rounded"></div>
+                <div className="drag-handle absolute top-0 left-0 right-0 h-8 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 bg-opacity-95 cursor-move flex items-center justify-between px-3 z-10 group hover:bg-opacity-100 transition-all shadow-md">
+                  <div className="flex gap-1.5 opacity-70 group-hover:opacity-100 transition-opacity">
+                    <div className="w-1.5 h-3.5 bg-white rounded-sm"></div>
+                    <div className="w-1.5 h-3.5 bg-white rounded-sm"></div>
+                    <div className="w-1.5 h-3.5 bg-white rounded-sm"></div>
                   </div>
+                  <span className="text-xs font-semibold text-white opacity-75">Drag to move</span>
                 </div>
               )}
               <div className={`h-full ${isEditable ? 'pt-8' : ''}`}>

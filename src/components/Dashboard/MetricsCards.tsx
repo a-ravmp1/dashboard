@@ -272,10 +272,10 @@ const MetricsCards: React.FC<MetricsCardsProps> = ({
         <div
           key={idx}
           ref={(el) => (cardRefs.current[idx] = el)}
-          className={`rounded-lg p-3 md:p-4 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-md ${
+          className={`rounded-lg p-3 md:p-4 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 ${
             theme === 'dark'
-              ? 'bg-[#162345] border border-gray-700/30'
-              : 'bg-white border border-gray-200'
+              ? 'bg-[#162345] border border-gray-700/30 hover:border-gray-600/50'
+              : 'bg-white border border-gray-200 hover:border-gray-300'
           }`}
         >
           <div className="flex items-center gap-3 mb-3">
@@ -324,10 +324,10 @@ const MetricsCards: React.FC<MetricsCardsProps> = ({
       {showLastRefresh && (
         <div
           ref={(el) => (cardRefs.current[3] = el)}
-          className={`rounded-lg p-3 md:p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md ${
-            theme === 'dark' ? 'bg-[#162345] border border-gray-700/30' : 'bg-white border border-gray-200'
+          className={`rounded-lg p-3 md:p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 ${
+            theme === 'dark' ? 'bg-[#162345] border border-gray-700/30 hover:border-gray-600/50' : 'bg-white border border-gray-200 hover:border-gray-300'
           } ${
-            isRefreshing ? `ring-2 ring-blue-400 ring-opacity-50 ${theme === 'dark' ? 'shadow-blue-500/20' : 'shadow-blue-400/10'}` : ''
+            isRefreshing ? `ring-2 ring-blue-400 ring-opacity-50 shadow-lg ${theme === 'dark' ? 'shadow-blue-500/30' : 'shadow-blue-400/20'}` : ''
           }`}
         >
           <div className="flex items-center gap-3 mb-3">
