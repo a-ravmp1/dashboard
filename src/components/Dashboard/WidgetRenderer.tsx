@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { DeviceChartData, HierarchyChartData } from '../../services/api';
@@ -49,6 +49,38 @@ const WidgetRenderer: React.FC<WidgetRendererProps> = ({
   const { theme } = useTheme();
   const { token } = useAuth();
   const dsConfig = widget.dataSourceConfig || {};
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setContainerWidth(containerRef.current.offsetWidth);
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
+  const getScaleFactor = () => {
+    if (containerWidth < 150) return 0.6;
+    if (containerWidth < 200) return 0.75;
+    if (containerWidth < 300) return 0.9;
+    if (containerWidth < 400) return 1;
+    return 1.2;
+  };
+
+  const scaleFactor = getScaleFactor();
 
   const handleDelete = async () => {
     if (!onDelete || !token) return;
@@ -131,35 +163,62 @@ const WidgetRenderer: React.FC<WidgetRendererProps> = ({
             })
           : '--:--:--';
 
+        const padding = containerWidth < 150 ? 8 : containerWidth < 250 ? 12 : 16;
+        const gap = containerWidth < 150 ? 8 : containerWidth < 250 ? 10 : 12;
+        const iconSize = Math.max(32, Math.min(40, containerWidth * 0.25));
+        const titleSize = Math.max(10, Math.min(14, containerWidth * 0.08));
+        const valueSize = Math.max(18, Math.min(36, containerWidth * 0.3));
+
         return (
-          <div className="h-full">
+          <div ref={containerRef} className="h-full w-full">
             <div
-              className={`h-full rounded-lg p-3 md:p-4 transition-all duration-300 overflow-hidden ${
+              className={`h-full rounded-lg transition-all duration-300 overflow-hidden ${
                 theme === 'dark' ? 'bg-[#162345]' : 'bg-white border border-gray-200'
               }`}
+              style={{ padding: `${padding}px` }}
             >
-              <div className="flex items-center gap-3 mb-3">
+              <div style={{ display: 'flex', alignItems: 'center', gap: `${gap}px`, marginBottom: `${gap}px` }}>
                 <div
-                  className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: dsConfig.color || '#d82e75' }}
+                  style={{
+                    width: `${iconSize}px`,
+                    height: `${iconSize}px`,
+                    backgroundColor: dsConfig.color || '#d82e75',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
                 >
-                  <AlarmClock className="w-4 h-4 md:w-5 md:h-5 text-white" />
+                  <AlarmClock style={{ width: iconSize * 0.5, height: iconSize * 0.5, color: 'white' }} />
                 </div>
-                <div className="flex-1 min-w-0">
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div
-                    className={`text-xs md:text-sm font-semibold truncate ${
-                      theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
-                    }`}
+                    style={{
+                      fontSize: `${titleSize}px`,
+                      fontWeight: 600,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      color: theme === 'dark' ? '#D0CCD8' : '#555758',
+                    }}
                   >
                     Last Refresh
                   </div>
                 </div>
               </div>
-              <div className="flex items-baseline gap-2 mb-1 md:mb-2 min-w-0">
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', minWidth: 0 }}>
                 <span
-                  className={`font-bold leading-none flex-shrink truncate text-2xl md:text-4xl ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-900'
-                  }`}
+                  style={{
+                    fontSize: `${valueSize}px`,
+                    fontWeight: 'bold',
+                    lineHeight: 1,
+                    flex: 'none',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    color: theme === 'dark' ? 'white' : '#1f2937',
+                  }}
                 >
                   {formattedTime}
                 </span>
@@ -170,44 +229,74 @@ const WidgetRenderer: React.FC<WidgetRendererProps> = ({
       }
 
       const value = getMetricValue(dsConfig.metric);
+      const padding = containerWidth < 150 ? 8 : containerWidth < 250 ? 12 : 16;
+      const gap = containerWidth < 150 ? 8 : containerWidth < 250 ? 10 : 12;
+      const iconSize = Math.max(32, Math.min(40, containerWidth * 0.25));
+      const titleSize = Math.max(10, Math.min(14, containerWidth * 0.08));
+      const valueSize = Math.max(18, Math.min(36, containerWidth * 0.3));
+      const unitSize = Math.max(10, Math.min(16, containerWidth * 0.08));
+
       return (
-        <div className="h-full">
+        <div ref={containerRef} className="h-full w-full">
           <div
-            className={`h-full rounded-lg p-3 md:p-4 transition-all duration-300 overflow-hidden ${
+            className={`h-full rounded-lg transition-all duration-300 overflow-hidden ${
               theme === 'dark' ? 'bg-[#162345]' : 'bg-white border border-gray-200'
             }`}
+            style={{ padding: `${padding}px` }}
           >
-            <div className="flex items-center gap-3 mb-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: `${gap}px`, marginBottom: `${gap}px` }}>
               <div
-                className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: theme === 'dark' ? (dsConfig.colorDark || '#4D3DF7') : (dsConfig.colorLight || '#F56C44') }}
+                style={{
+                  width: `${iconSize}px`,
+                  height: `${iconSize}px`,
+                  backgroundColor: theme === 'dark' ? (dsConfig.colorDark || '#4D3DF7') : (dsConfig.colorLight || '#F56C44'),
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
               >
-                <img src={dsConfig.icon || '/oildark.png'} alt={dsConfig.title} className="w-5 h-5 md:w-6 md:h-6" />
+                <img src={dsConfig.icon || '/oildark.png'} alt={dsConfig.title} style={{ width: iconSize * 0.6, height: iconSize * 0.6 }} />
               </div>
-              <div className="flex-1 min-w-0">
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div
-                  className={`text-xs md:text-sm font-semibold truncate ${
-                    theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
-                  }`}
+                  style={{
+                    fontSize: `${titleSize}px`,
+                    fontWeight: 600,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    color: theme === 'dark' ? '#D0CCD8' : '#555758',
+                  }}
                 >
                   {dsConfig.title || 'Metric'}
                 </div>
               </div>
             </div>
-            <div className="flex items-baseline gap-2 mb-1 md:mb-2 min-w-0">
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', minWidth: 0 }}>
               <span
-                className={`font-bold leading-none flex-shrink truncate text-2xl md:text-4xl ${
-                  isDeviceOffline
-                    ? theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
-                    : theme === 'dark' ? 'text-white' : 'text-gray-900'
-                }`}
+                style={{
+                  fontSize: `${valueSize}px`,
+                  fontWeight: 'bold',
+                  lineHeight: 1,
+                  flex: 'none',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  color: isDeviceOffline
+                    ? theme === 'dark' ? '#6b7280' : '#9ca3af'
+                    : theme === 'dark' ? 'white' : '#1f2937',
+                }}
               >
                 {value.toFixed(2)}
               </span>
               <span
-                className={`flex-shrink-0 leading-none text-sm md:text-base ${
-                  theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
-                }`}
+                style={{
+                  fontSize: `${unitSize}px`,
+                  flex: 'none',
+                  color: theme === 'dark' ? '#D0CCD8' : '#555758',
+                }}
               >
                 {dsConfig.unit || 'l/min'}
               </span>

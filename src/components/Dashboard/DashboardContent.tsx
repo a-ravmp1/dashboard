@@ -7,7 +7,7 @@ import { apiService, DeviceChartData, HierarchyChartData, Device } from '../../s
 import DynamicDashboard from './DynamicDashboard';
 import WidgetRenderer from './WidgetRenderer';
 import AddWidgetModal from './AddWidgetModal';
-import { Calendar, ChevronDown, Check } from 'lucide-react';
+import { Calendar, ChevronDown, Check, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 
@@ -489,7 +489,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
               )}
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <div className="flex items-center gap-3">
                 <AnimatedSelect
                   value={timeRange}
@@ -501,6 +501,21 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                   theme={theme}
                 />
               </div>
+
+              {userRole === 'admin' && editMode && (
+                <motion.button
+                  onClick={() => setShowAddWidgetModal(true)}
+                  whileTap={{ scale: 0.95 }}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition ${
+                    theme === 'dark'
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-blue-500 text-white hover:bg-blue-600'
+                  }`}
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Widget
+                </motion.button>
+              )}
 
               {userRole === 'admin' && (
                 <motion.button
@@ -523,20 +538,10 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
           <div
             className={`relative rounded-md p-4 transition-all duration-300 ${
               editMode
-                ? 'border-2 border-white border-dotted p-4 bg-[#6872DB]'
+                ? 'border-2 border-white border-dotted p-4'
                 : ''
             }`}
           >
-            {editMode && (
-              <div className="">
-                <button
-                  onClick={() => setShowAddWidgetModal(true)}
-                  className="bg-[#162345] text-white text-sm px-3 py-3 rounded-sm"
-                >
-                  + Add New Widget
-                </button>
-              </div>
-            )}
 
             {widgetsLoaded ? (
               <div style={{ width: '100%' }}>

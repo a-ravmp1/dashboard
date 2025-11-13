@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import GridLayout, { Layout } from 'react-grid-layout';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
 import { apiService } from '../../services/api';
 import 'react-grid-layout/css/styles.css';
+import '../../../node_modules/react-resizable/css/styles.css';
 
 interface WidgetConfig {
   layoutId: string;
@@ -47,6 +48,7 @@ const DynamicDashboard: React.FC<DynamicDashboardProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [containerWidth, setContainerWidth] = useState(1200);
   const containerRef = useRef<HTMLDivElement>(null);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Track container width for responsive grid
   useEffect(() => {
@@ -86,7 +88,7 @@ const DynamicDashboard: React.FC<DynamicDashboardProps> = ({
 
   console.log('[GRID] Rendering', widgets.length, 'widgets in', layouts.length, 'positions');
 
-  const handleLayoutChange = async (newLayout: Layout[]) => {
+  const handleLayoutChange = useCallback((newLayout: Layout[]) => {
     if (!isEditable) return;
 
     console.log('[DYNAMIC DASHBOARD] Layout changed:', newLayout);
@@ -96,33 +98,39 @@ const DynamicDashboard: React.FC<DynamicDashboardProps> = ({
       onLayoutChange(newLayout);
     }
 
-    // Auto-save to database
-    if (token) {
-      try {
-        setIsSaving(true);
-
-        const layoutUpdates = newLayout.map((layout) => ({
-          layoutId: layout.i,
-          layoutConfig: {
-            x: layout.x,
-            y: layout.y,
-            w: layout.w,
-            h: layout.h,
-            minW: layout.minW ?? 2,
-            minH: layout.minH ?? 1,
-            static: layout.static ?? false,
-          },
-        }));
-
-        await apiService.updateDashboardLayouts(dashboardId, layoutUpdates, token);
-        console.log('[DYNAMIC DASHBOARD] Layout saved to database');
-      } catch (error) {
-        console.error('[DYNAMIC DASHBOARD] Failed to save layout:', error);
-      } finally {
-        setIsSaving(false);
-      }
+    // Debounce auto-save to database
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
     }
-  };
+
+    setIsSaving(true);
+
+    saveTimeoutRef.current = setTimeout(async () => {
+      if (token) {
+        try {
+          const layoutUpdates = newLayout.map((layout) => ({
+            layoutId: layout.i,
+            layoutConfig: {
+              x: layout.x,
+              y: layout.y,
+              w: layout.w,
+              h: layout.h,
+              minW: layout.minW ?? 2,
+              minH: layout.minH ?? 1,
+              static: layout.static ?? false,
+            },
+          }));
+
+          await apiService.updateDashboardLayouts(dashboardId, layoutUpdates, token);
+          console.log('[DYNAMIC DASHBOARD] Layout saved to database');
+        } catch (error) {
+          console.error('[DYNAMIC DASHBOARD] Failed to save layout:', error);
+        } finally {
+          setIsSaving(false);
+        }
+      }
+    }, 500);
+  }, [isEditable, token, dashboardId, onLayoutChange]);
 
   // Create a map of layoutId to widget for quick lookup
   const widgetMap = useMemo(() => {
@@ -154,6 +162,7 @@ const DynamicDashboard: React.FC<DynamicDashboardProps> = ({
         isResizable={isEditable}
         onLayoutChange={handleLayoutChange}
         draggableHandle=".drag-handle"
+        resizeHandle=".resize-handle"
         compactType="vertical"
         preventCollision={false}
       >
@@ -164,17 +173,22 @@ const DynamicDashboard: React.FC<DynamicDashboardProps> = ({
           return (
             <div
               key={layout.i}
-              className={`rounded-lg overflow-hidden shadow-sm transition-all duration-300 ${
+              className={`rounded-lg overflow-hidden shadow-sm transition-all duration-300 group ${
                 theme === 'dark'
                   ? 'bg-[#162345]'
                   : 'bg-white border border-gray-200'
-              }`}
+              } ${isEditable ? 'ring-1 ring-blue-400/30' : ''}`}
               style={{
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
               {isEditable && (
-                <div className="drag-handle absolute top-0 left-0 h-full w-1 bg-gradient-to-b from-blue-500 to-blue-600 cursor-move z-10 hover:w-1.5 transition-all"></div>
+                <>
+                  <div className="drag-handle absolute top-0 left-0 h-full w-1 bg-gradient-to-b from-blue-500 to-blue-600 cursor-move z-10 hover:w-1.5 transition-all"></div>
+                  <div className={`resize-handle absolute bottom-0 right-0 w-4 h-4 cursor-se-resize z-10 transition-all ${
+                    theme === 'dark' ? 'bg-blue-500/70' : 'bg-blue-400/70'
+                  } hover:bg-blue-500 rounded-tl-md opacity-0 group-hover:opacity-100`}></div>
+                </>
               )}
               <div className={`h-full`}>
                 {children(widget)}
