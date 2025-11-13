@@ -448,108 +448,163 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
     }
   };
 
+  const [editMode, setEditMode] = useState(false);
+
   return (
     <div
-      className={`h-full p-4 overflow-y-auto ${
-        theme === 'dark' ? 'bg-[]' : 'bg-gray-50'
+      className={`h-full overflow-y-auto transition-colors duration-300 ${
+        theme === 'dark' ? 'bg-[#0b1326]' : 'bg-gray-50'
       }`}
     >
       {children || (
         <>
-          {/* Time Range Selector */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <h1
-                className={`text-3xl font-semibold md:tracking-wide ${
-                  theme === 'dark' ? 'text-white' : 'text-gray-900'
-                }`}
-              >
-                {selectedHierarchy &&
-                selectedHierarchy.id !== selectedHierarchy.name
-                  ? `${selectedHierarchy.name} Dashboard`
-                  : selectedDevice
-                  ? `Device ${
-                      selectedDevice.serial_number ||
-                      selectedDevice.deviceSerial
-                    } Dashboard`
-                  : 'Production Dashboard'}
-              </h1>
-              {isLoading && (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                  <span
-                    className={`text-sm ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                    }`}
-                  >
-                    Loading...
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
-              {userRole === 'admin' && (
-                <button
-                  onClick={() => setShowAddWidgetModal(true)}
-                  className={`flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors ${
-                    theme === 'dark'
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-blue-500 text-white hover:bg-blue-600'
+          <div className="p-4 md:p-6">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+              <div className="flex items-center gap-4">
+                <h1
+                  className={`text-2xl md:text-3xl font-semibold tracking-tight ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
                   }`}
                 >
-                  <Plus className="h-4 w-4" />
-                  Add Widget
-                </button>
-              )}
-              <AnimatedSelect
-                value={timeRange}
-                onChange={handleTimeRangeChange}
-                options={timeRangeOptions.map((o) => ({
-                  value: o.value,
-                  label: o.label,
-                }))}
-                theme={theme}
-              />
-            </div>
-          </div>
-
-          {widgetsLoaded && widgets.length > 0 ? (
-            <div style={{ width: '100%' }}>
-              <DynamicDashboard
-                dashboardId={dashboardConfig?.id || 'default'}
-                widgets={widgets}
-                isEditable={false}
-              >
-                {(widget) => (
-                  <WidgetRenderer
-                    widget={widget}
-                    chartData={widget.component === 'FlowRateChart' ? flowRateChartData : metricsChartData}
-                    hierarchyChartData={widget.component === 'FlowRateChart' ? flowRateHierarchyChartData : metricsHierarchyChartData}
-                    timeRange={timeRange as '1day' | '7days' | '1month'}
-                    lastRefresh={lastRefresh}
-                    isDeviceOffline={metricsChartData?.device?.status === 'Offline'}
-                    selectedDevice={selectedDevice}
-                    selectedHierarchy={selectedHierarchy}
-                    isAdmin={userRole === 'admin'}
-                    onDelete={handleDeleteWidget}
-                  />
+                  {selectedHierarchy &&
+                  selectedHierarchy.id !== selectedHierarchy.name
+                    ? `${selectedHierarchy.name} Dashboard`
+                    : selectedDevice
+                    ? `Device ${
+                        selectedDevice.serial_number ||
+                        selectedDevice.deviceSerial
+                      } Dashboard`
+                    : 'Production Dashboard'}
+                </h1>
+                {isLoading && (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                    <span
+                      className={`text-sm ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}
+                    >
+                      Loading...
+                    </span>
+                  </div>
                 )}
-              </DynamicDashboard>
-            </div>
-          ) : widgetsLoaded ? (
-            <div className="text-center py-12">
-              <p className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                No widgets configured for this dashboard
-              </p>
-            </div>
-          ) : null}
+              </div>
 
-          {/* Version Info */}
-          <div className={`text-center py-4 text-xs ${
-            theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
-          }`}>
-            Version 1.0.0
+              <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                {userRole === 'admin' && editMode && (
+                  <motion.button
+                    onClick={() => setShowAddWidgetModal(true)}
+                    whileTap={{ scale: 0.95 }}
+                    className={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-sm font-medium transition-colors ${
+                      theme === 'dark'
+                        ? 'bg-blue-600 text-white hover:bg-blue-700'
+                        : 'bg-blue-500 text-white hover:bg-blue-600'
+                    }`}
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span className="hidden sm:inline">Add Widget</span>
+                  </motion.button>
+                )}
+                <AnimatedSelect
+                  value={timeRange}
+                  onChange={handleTimeRangeChange}
+                  options={timeRangeOptions.map((o) => ({
+                    value: o.value,
+                    label: o.label,
+                  }))}
+                  theme={theme}
+                />
+                {userRole === 'admin' && (
+                  <motion.button
+                    onClick={() => setEditMode(!editMode)}
+                    whileTap={{ scale: 0.95 }}
+                    className={`px-3 md:px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
+                      editMode
+                        ? 'bg-green-600 text-white hover:bg-green-700'
+                        : theme === 'dark'
+                        ? 'bg-[#162345] text-white hover:bg-[#1f2d4d]'
+                        : 'bg-white border border-gray-300 text-gray-800 hover:bg-gray-100'
+                    }`}
+                  >
+                    {editMode ? 'Save Layout' : 'Edit Layout'}
+                  </motion.button>
+                )}
+              </div>
+            </div>
+
+            {/* Canvas Container */}
+            {widgetsLoaded ? (
+              <div
+                className={`rounded-lg transition-all duration-300 ${
+                  editMode
+                    ? `border-2 border-dashed p-4 md:p-6 ${
+                        theme === 'dark'
+                          ? 'border-blue-500/50 bg-blue-500/5'
+                          : 'border-blue-400 bg-blue-50/30'
+                      }`
+                    : 'p-0'
+                }`}
+              >
+                {widgets.length > 0 ? (
+                  <div style={{ width: '100%' }}>
+                    <DynamicDashboard
+                      dashboardId={dashboardConfig?.id || 'default'}
+                      widgets={widgets}
+                      isEditable={editMode}
+                    >
+                      {(widget) => (
+                        <WidgetRenderer
+                          widget={widget}
+                          chartData={widget.component === 'FlowRateChart' ? flowRateChartData : metricsChartData}
+                          hierarchyChartData={widget.component === 'FlowRateChart' ? flowRateHierarchyChartData : metricsHierarchyChartData}
+                          timeRange={timeRange as '1day' | '7days' | '1month'}
+                          lastRefresh={lastRefresh}
+                          isDeviceOffline={metricsChartData?.device?.status === 'Offline'}
+                          selectedDevice={selectedDevice}
+                          selectedHierarchy={selectedHierarchy}
+                          isAdmin={userRole === 'admin' && editMode}
+                          onDelete={handleDeleteWidget}
+                        />
+                      )}
+                    </DynamicDashboard>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <p
+                      className={`text-lg ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}
+                    >
+                      No widgets configured for this dashboard
+                    </p>
+                    {userRole === 'admin' && editMode && (
+                      <motion.button
+                        onClick={() => setShowAddWidgetModal(true)}
+                        whileTap={{ scale: 0.95 }}
+                        className={`mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors ${
+                          theme === 'dark'
+                            ? 'bg-blue-600 text-white hover:bg-blue-700'
+                            : 'bg-blue-500 text-white hover:bg-blue-600'
+                        }`}
+                      >
+                        <Plus className="h-4 w-4" />
+                        Add Widget
+                      </motion.button>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : null}
+
+            {/* Version Info */}
+            <div
+              className={`text-center py-4 text-xs mt-6 ${
+                theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+              }`}
+            >
+              Version 1.0.0
+            </div>
           </div>
         </>
       )}

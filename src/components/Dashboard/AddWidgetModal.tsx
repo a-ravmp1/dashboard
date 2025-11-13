@@ -171,23 +171,23 @@ const AddWidgetModal: React.FC<AddWidgetModalProps> = ({ isOpen, onClose, onSucc
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div
-        className={`relative w-full max-w-3xl rounded-lg shadow-2xl ${
+        className={`relative w-full max-w-3xl rounded-lg shadow-2xl transition-all ${
           theme === 'dark' ? 'bg-[#0B1437]' : 'bg-white'
         }`}
       >
-        <div className={`flex items-center justify-between border-b p-6 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className={`flex items-center justify-between border-b p-6 ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'}`}>
           <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             Add New Widget
           </h2>
           <button
             onClick={handleClose}
-            className={`rounded-lg p-2 transition-colors ${
-              theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+            className={`rounded-lg p-2 transition-all hover:scale-110 ${
+              theme === 'dark' ? 'hover:bg-gray-700/50' : 'hover:bg-gray-100'
             }`}
           >
-            <X className={theme === 'dark' ? 'text-white' : 'text-gray-900'} />
+            <X className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} w-5 h-5`} />
           </button>
         </div>
 
@@ -201,9 +201,9 @@ const AddWidgetModal: React.FC<AddWidgetModalProps> = ({ isOpen, onClose, onSucc
               <React.Fragment key={s.num}>
                 <div className="flex flex-col items-center">
                   <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-full font-semibold transition-all ${
                       step >= s.num
-                        ? 'bg-blue-500 text-white'
+                        ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
                         : theme === 'dark'
                         ? 'bg-gray-700 text-gray-400'
                         : 'bg-gray-200 text-gray-500'
@@ -211,7 +211,7 @@ const AddWidgetModal: React.FC<AddWidgetModalProps> = ({ isOpen, onClose, onSucc
                   >
                     {step > s.num ? <Check className="h-5 w-5" /> : s.num}
                   </div>
-                  <span className={`mt-2 text-xs font-medium ${
+                  <span className={`mt-2 text-xs font-medium transition-colors ${
                     step >= s.num
                       ? 'text-blue-500'
                       : theme === 'dark'
@@ -223,7 +223,7 @@ const AddWidgetModal: React.FC<AddWidgetModalProps> = ({ isOpen, onClose, onSucc
                 </div>
                 {idx < 2 && (
                   <div
-                    className={`h-1 w-16 mt-0 mb-6 ${
+                    className={`h-1 w-16 mt-0 mb-6 transition-colors ${
                       step > s.num
                         ? 'bg-blue-500'
                         : theme === 'dark'

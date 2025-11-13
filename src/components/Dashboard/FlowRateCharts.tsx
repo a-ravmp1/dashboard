@@ -107,39 +107,44 @@ const FlowRateChart: React.FC<SingleFlowRateChartProps> = ({
 
   return (
     <div
-      className={`rounded-lg p-4 shadow-sm ${theme === 'dark' ? 'bg-[#162345]' : 'bg-white border border-gray-200'}`}
+      className={`rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-300 ${
+        theme === 'dark'
+          ? 'bg-[#162345] border border-gray-700/30'
+          : 'bg-white border border-gray-200'
+      }`}
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <h3 className={`text-base font-semibold ${theme === 'dark' ? 'text-[#fff]' : 'text-[#0f0f0f]'}`}>
+          <h3
+            className={`text-base font-semibold ${
+              theme === 'dark' ? 'text-white' : 'text-[#0f0f0f]'
+            }`}
+          >
             {title} ({unit})
           </h3>
           <Info
             size={18}
-            className={`cursor-pointer ${theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'}`}
+            className={`cursor-pointer hover:opacity-100 opacity-60 transition-opacity ${
+              theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
+            }`}
             onClick={onInfoClick}
           />
         </div>
-        <div className={`flex items-center gap-2 border px-3 py-1.5 rounded-lg ${theme === 'dark' ? 'border-[#D0CCD8] text-gray-400 hover:text-white' : 'border-[#EAEAEA] text-gray-600 hover:text-gray-900'}`}>
+        <div
+          className={`flex items-center gap-2 border px-3 py-1.5 rounded-lg transition-colors ${
+            theme === 'dark'
+              ? 'border-gray-600 text-gray-400 hover:text-white hover:border-gray-500'
+              : 'border-gray-300 text-gray-600 hover:text-gray-900 hover:border-gray-400'
+          }`}
+        >
           <ExternalLink
             size={16}
-            className="dark:text-white cursor-pointer dark:hover:text-gray-200 transition-colors"
+            className="cursor-pointer transition-colors"
             onClick={onExpandClick}
           />
-          <MoreHorizontal size={16} className="text-gray-400 dark:text-white cursor-pointer hover:text-gray-800 dark:hover:text-gray-200" />
+          <MoreHorizontal size={16} className="cursor-pointer" />
         </div>
       </div>
-
-      {/* <div className="mb-3">
-        <div className="flex gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-1 bg-[#38BF9D] dark:bg-[#EC4899] rounded"></div>
-            <span className={`text-sm font-thin ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-              Line Condition
-            </span>
-          </div>
-        </div>
-      </div> */}
 
       {renderChart(240, false)}
     </div>
@@ -321,7 +326,7 @@ const FlowRateCharts: React.FC<FlowRateChartsProps> = ({ chartData, hierarchyCha
 
   return (
     <>
-      <div className="w-full">
+      <div className="w-full space-y-4">
         {ofrConfig && (
           <div className="relative h-full">
             <FlowRateChart
@@ -334,19 +339,19 @@ const FlowRateCharts: React.FC<FlowRateChartsProps> = ({ chartData, hierarchyCha
               onExpandClick={() => setModalOpen('ofr')}
               onInfoClick={() => setShowInfoCard('ofr')}
             />
-          {showInfoCard === 'ofr' && (
-            <div className={`absolute top-16 left-4 right-4 z-50 p-4 rounded-lg shadow-xl border ${theme === 'dark' ? 'bg-[#1a2847] border-gray-700' : 'bg-white border-gray-200'}`}>
-              <div className="flex items-start justify-between mb-2">
-                <h4 className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Oil Flow Rate (OFR)</h4>
-                <button onClick={() => setShowInfoCard(null)} className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
-                  <X className="w-4 h-4" />
-                </button>
+            {showInfoCard === 'ofr' && (
+              <div className={`absolute top-16 left-4 right-4 z-50 p-4 rounded-lg shadow-xl border ${theme === 'dark' ? 'bg-[#0f1929] border-gray-700' : 'bg-white border-gray-200'}`}>
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Oil Flow Rate (OFR)</h4>
+                  <button onClick={() => setShowInfoCard(null)} className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                  Oil Flow Rate measures the volume of oil flowing through the system per unit time, typically measured in liters per minute (l/min) or barrels per day (bpd).
+                </p>
               </div>
-              <p className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Oil Flow Rate measures the volume of oil flowing through the system per unit time, typically measured in liters per minute (l/min) or barrels per day (bpd).
-              </p>
-            </div>
-          )}
+            )}
           </div>
         )}
         {wfrConfig && (
@@ -361,19 +366,19 @@ const FlowRateCharts: React.FC<FlowRateChartsProps> = ({ chartData, hierarchyCha
               onExpandClick={() => setModalOpen('wfr')}
               onInfoClick={() => setShowInfoCard('wfr')}
             />
-          {showInfoCard === 'wfr' && (
-            <div className={`absolute top-16 left-4 right-4 z-50 p-4 rounded-lg shadow-xl border ${theme === 'dark' ? 'bg-[#1a2847] border-gray-700' : 'bg-white border-gray-200'}`}>
-              <div className="flex items-start justify-between mb-2">
-                <h4 className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Water Flow Rate (WFR)</h4>
-                <button onClick={() => setShowInfoCard(null)} className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
-                  <X className="w-4 h-4" />
-                </button>
+            {showInfoCard === 'wfr' && (
+              <div className={`absolute top-16 left-4 right-4 z-50 p-4 rounded-lg shadow-xl border ${theme === 'dark' ? 'bg-[#0f1929] border-gray-700' : 'bg-white border-gray-200'}`}>
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Water Flow Rate (WFR)</h4>
+                  <button onClick={() => setShowInfoCard(null)} className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                  Water Flow Rate measures the volume of water flowing through the system per unit time. This is important for monitoring water production and managing water cut in oil wells.
+                </p>
               </div>
-              <p className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Water Flow Rate measures the volume of water flowing through the system per unit time. This is important for monitoring water production and managing water cut in oil wells.
-              </p>
-            </div>
-          )}
+            )}
           </div>
         )}
         {gfrConfig && (
@@ -388,19 +393,19 @@ const FlowRateCharts: React.FC<FlowRateChartsProps> = ({ chartData, hierarchyCha
               onExpandClick={() => setModalOpen('gfr')}
               onInfoClick={() => setShowInfoCard('gfr')}
             />
-          {showInfoCard === 'gfr' && (
-            <div className={`absolute top-16 left-4 right-4 z-50 p-4 rounded-lg shadow-xl border ${theme === 'dark' ? 'bg-[#1a2847] border-gray-700' : 'bg-white border-gray-200'}`}>
-              <div className="flex items-start justify-between mb-2">
-                <h4 className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Gas Flow Rate (GFR)</h4>
-                <button onClick={() => setShowInfoCard(null)} className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
-                  <X className="w-4 h-4" />
-                </button>
+            {showInfoCard === 'gfr' && (
+              <div className={`absolute top-16 left-4 right-4 z-50 p-4 rounded-lg shadow-xl border ${theme === 'dark' ? 'bg-[#0f1929] border-gray-700' : 'bg-white border-gray-200'}`}>
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Gas Flow Rate (GFR)</h4>
+                  <button onClick={() => setShowInfoCard(null)} className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                  Gas Flow Rate measures the volume of gas flowing through the system per unit time. Monitoring GFR is essential for optimizing gas production and understanding reservoir performance.
+                </p>
               </div>
-              <p className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Gas Flow Rate measures the volume of gas flowing through the system per unit time. Monitoring GFR is essential for optimizing gas production and understanding reservoir performance.
-              </p>
-            </div>
-          )}
+            )}
           </div>
         )}
       </div>

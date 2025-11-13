@@ -272,15 +272,15 @@ const MetricsCards: React.FC<MetricsCardsProps> = ({
         <div
           key={idx}
           ref={(el) => (cardRefs.current[idx] = el)}
-          className={`rounded-lg p-3 md:p-4 transition-all duration-300 overflow-hidden ${
+          className={`rounded-lg p-3 md:p-4 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-md ${
             theme === 'dark'
-              ? 'bg-[#162345]'
+              ? 'bg-[#162345] border border-gray-700/30'
               : 'bg-white border border-gray-200'
           }`}
         >
           <div className="flex items-center gap-3 mb-3">
             <div
-              className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center shrink-0"
+              className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm"
               style={{ backgroundColor: metric.color }}
             >
               <img src={metric.icon} alt={metric.title} className="w-5 h-5 md:w-6 md:h-6" />
@@ -298,7 +298,6 @@ const MetricsCards: React.FC<MetricsCardsProps> = ({
             </div>
           </div>
 
-          {/* big number + adjacent "l/min" */}
           <div className="flex items-baseline gap-2 mb-1 md:mb-2 min-w-0">
             <span
               className={`font-bold leading-none flex-shrink truncate ${
@@ -322,72 +321,70 @@ const MetricsCards: React.FC<MetricsCardsProps> = ({
         </div>
       ))}
 
-      {/* Last Refresh card — only this shows refresh animation */}
       {showLastRefresh && (
         <div
           ref={(el) => (cardRefs.current[3] = el)}
-          className={`rounded-lg p-3 md:p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden ${
-            theme === 'dark' ? 'bg-[#162345]' : 'bg-white border border-gray-200'
+          className={`rounded-lg p-3 md:p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md ${
+            theme === 'dark' ? 'bg-[#162345] border border-gray-700/30' : 'bg-white border border-gray-200'
           } ${
-            isRefreshing ? 'ring-2 ring-blue-400 ring-opacity-50 shadow-lg' : ''
+            isRefreshing ? `ring-2 ring-blue-400 ring-opacity-50 ${theme === 'dark' ? 'shadow-blue-500/20' : 'shadow-blue-400/10'}` : ''
           }`}
         >
           <div className="flex items-center gap-3 mb-3">
             <div
-              className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center shrink-0"
+              className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm"
               style={{ backgroundColor: lastRefreshConfig.color || '#d82e75' }}
             >
               <AlarmClock className="w-4 h-4 md:w-5 md:h-5 text-white" />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div
+                className={`text-xs md:text-sm font-semibold truncate ${
+                  theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
+                }`}
+              >
+                Last Refresh
+              </div>
+              <div
+                className={`text-xs mt-0.5 hidden md:block truncate ${
+                  theme === 'dark' ? 'text-[#A2AED4]' : 'text-gray-500'
+                }`}
+              >
+                {lastRefreshLabel}
+              </div>
+            </div>
+
+            <div className="ml-1 md:ml-2 flex items-center shrink-0">
+              {isRefreshing && (
+                <RefreshCw
+                  className={`w-3 h-3 md:w-4 md:h-4 animate-spin ${
+                    theme === 'dark' ? 'text-blue-400' : 'text-blue-500'
+                  }`}
+                />
+              )}
+            </div>
           </div>
 
-          <div className="flex-1 min-w-0">
+          <div className="mt-1 md:mt-2 min-w-0">
             <div
-              className={`text-xs md:text-sm font-semibold truncate ${
+              className={`font-semibold leading-none truncate ${
+                theme === 'dark' ? 'text-white' : 'text-gray-900'
+              }`}
+              style={{ fontSize: `${getValueFontSize(3, formattedLastRefresh)}px` }}
+            >
+              {formattedLastRefresh}
+            </div>
+            <div
+              className={`text-xs mt-1 truncate ${
                 theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
               }`}
             >
-              Last Refresh
-            </div>
-            <div
-              className={`text-xs mt-0.5 hidden md:block truncate ${
-                theme === 'dark' ? 'text-[#A2AED4]' : 'text-gray-500'
-              }`}
-            >
-              {lastRefreshLabel}
+              {lastRefresh
+                ? new Date(lastRefresh).toLocaleDateString('en-GB')
+                : ''}
             </div>
           </div>
-
-          {/* spinner aligned with other cards — only visible for Last Refresh */}
-          <div className="ml-1 md:ml-2 flex items-center shrink-0">
-            {isRefreshing && (
-              <RefreshCw
-                className={`w-3 h-3 md:w-4 md:h-4 animate-spin ${
-                  theme === 'dark' ? 'text-blue-400' : 'text-blue-500'
-                }`}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="mt-1 md:mt-2 min-w-0">
-          <div
-            className={`font-semibold leading-none truncate ${
-              theme === 'dark' ? 'text-white' : 'text-gray-900'
-            }`}
-            style={{ fontSize: `${getValueFontSize(3, formattedLastRefresh)}px` }}
-          >
-            {formattedLastRefresh}
-          </div>
-          <div
-            className={`text-xs mt-1 truncate ${
-              theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
-            }`}
-          >
-            {lastRefresh
-              ? new Date(lastRefresh).toLocaleDateString('en-GB')
-              : ''}
-          </div>
-        </div>
         </div>
       )}
     </div>

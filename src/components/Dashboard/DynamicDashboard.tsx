@@ -146,7 +146,7 @@ const DynamicDashboard: React.FC<DynamicDashboardProps> = ({
         className="layout"
         layout={layouts}
         cols={12}
-        rowHeight={80}
+        rowHeight={100}
         width={containerWidth}
         margin={[16, 16]}
         containerPadding={[0, 0]}
@@ -164,23 +164,29 @@ const DynamicDashboard: React.FC<DynamicDashboardProps> = ({
           return (
             <div
               key={layout.i}
-              className={`${
-                theme === 'dark' ? 'bg-[#0B1437]' : 'bg-gray-50'
-              } rounded-lg overflow-hidden`}
+              className={`rounded-lg overflow-hidden shadow-sm transition-all duration-300 ${
+                isEditable
+                  ? theme === 'dark'
+                    ? 'ring-2 ring-blue-500/30 bg-[#0B1437] hover:ring-blue-500/50'
+                    : 'ring-2 ring-blue-400/20 bg-white hover:ring-blue-400/40'
+                  : theme === 'dark'
+                  ? 'bg-[#0B1437]'
+                  : 'bg-white'
+              }`}
               style={{
-                transition: 'all 0.3s ease',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
               {isEditable && (
-                <div className="drag-handle absolute top-0 left-0 right-0 h-8 bg-blue-500 bg-opacity-20 cursor-move flex items-center justify-center z-10">
-                  <div className="flex gap-1">
-                    <div className="w-1 h-4 bg-blue-400 rounded"></div>
-                    <div className="w-1 h-4 bg-blue-400 rounded"></div>
-                    <div className="w-1 h-4 bg-blue-400 rounded"></div>
+                <div className="drag-handle absolute top-0 left-0 right-0 h-7 bg-gradient-to-r from-blue-500 to-blue-600 bg-opacity-90 cursor-move flex items-center justify-center z-10 group hover:bg-opacity-100 transition-all">
+                  <div className="flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                    <div className="w-1 h-3 bg-white rounded"></div>
+                    <div className="w-1 h-3 bg-white rounded"></div>
+                    <div className="w-1 h-3 bg-white rounded"></div>
                   </div>
                 </div>
               )}
-              <div className={isEditable ? 'mt-8' : ''}>
+              <div className={`h-full ${isEditable ? 'pt-8' : ''}`}>
                 {children(widget)}
               </div>
             </div>
