@@ -4,6 +4,9 @@ import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
 import { HierarchyChartData, DeviceChartData } from '../../services/api';
 import { AlarmClock, RefreshCw } from 'lucide-react';
+import GridLayout, { Layout } from 'react-grid-layout';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 
 interface MetricsCardsProps {
   selectedHierarchy?: any;
@@ -266,127 +269,144 @@ const MetricsCards: React.FC<MetricsCardsProps> = ({
   const showLastRefresh = widgetConfigs.length === 0 || widgetConfigs.some(w => w.dataSourceConfig?.metric === 'last_refresh');
   const lastRefreshConfig = widgetConfigs.find(w => w.dataSourceConfig?.metric === 'last_refresh')?.dataSourceConfig || { color: '#d82e75' };
 
+  const layout: Layout[] = [
+    { i: 'ofr', x: 0, y: 0, w: 1, h: 1 },
+    { i: 'wfr', x: 1, y: 0, w: 1, h: 1 },
+    { i: 'gfr', x: 2, y: 0, w: 1, h: 1 },
+    { i: 'refresh', x: 3, y: 0, w: 1, h: 1 },
+  ];
+
+  const renderMetricCard = (metric: any) => (
+    <div
+      className={`rounded-lg p-4 transition-all duration-300 ${
+        theme === 'dark' ? 'bg-[#162345]' : 'bg-white border border-gray-200'
+      }`}
+    >
+      <div className="flex items-center gap-4 mb-3">
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+          style={{ backgroundColor: metric.color }}
+        >
+          <img src={metric.icon} alt={metric.title} className="w-6 h-6" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div
+            className={`text-sm font-semibold truncate ${
+              theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
+            }`}
+          >
+            <span className="hidden md:inline">{metric.title}</span>
+            <span className="md:hidden">{metric.shortTitle}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-baseline gap-4 mb-2">
+        <span
+          className={`xl:text-4xl lg:text-2xl md:text-xl font-bold sm:3xl ${
+            theme === 'dark' ? 'text-white' : 'text-gray-900'
+          }`}
+        >
+          {metric.value}
+        </span>
+        <span
+          className={`text-base ${
+            theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
+          }`}
+        >
+          {metric.unit}
+        </span>
+      </div>
+    </div>
+  );
+
+  const renderLastRefreshCard = () => (
+    <div
+      className={`rounded-lg p-4 transition-all duration-300 flex flex-col justify-between ${
+        theme === 'dark' ? 'bg-[#162345]' : 'bg-white border border-gray-200'
+      } ${
+        isRefreshing ? 'ring-2 ring-blue-400 ring-opacity-50 shadow-lg' : ''
+      }`}
+    >
+      <div className="flex items-center gap-4 ">
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+          style={{ backgroundColor: '#d82e75' }}
+        >
+          <AlarmClock className="w-5 h-5 text-white" />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div
+            className={`text-sm font-semibold ${
+              theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
+            }`}
+          >
+            Last Refresh
+          </div>
+          <div
+            className={`text-xs mt-0.5 hidden md:block ${
+              theme === 'dark' ? 'text-[#A2AED4]' : 'text-gray-500'
+            }`}
+          >
+            {lastRefreshLabel}
+          </div>
+        </div>
+
+        {isRefreshing && (
+          <RefreshCw
+            className={`w-4 h-4 animate-spin ${
+              theme === 'dark' ? 'text-blue-400' : 'text-blue-500'
+            }`}
+          />
+        )}
+      </div>
+
+      <div className="mt-2">
+        <div
+          className={`xl:text-2xl lg:text-xl md:text-xl sm:3xl font-semibold leading-none ${
+            theme === 'dark' ? 'text-white' : 'text-gray-900'
+          }`}
+        >
+          {formattedLastRefresh}
+        </div>
+        <div
+          className={`text-xs mt-1 ${
+            theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
+          }`}
+        >
+          {lastRefresh ? new Date(lastRefresh).toLocaleDateString('en-GB') : ''}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4">
-      {metrics.map((metric, idx) => (
-        <div
-          key={idx}
-          ref={(el) => (cardRefs.current[idx] = el)}
-          className={`rounded-lg p-3 md:p-4 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 ${
-            theme === 'dark'
-              ? 'bg-[#162345] border border-gray-700/30 hover:border-gray-600/50'
-              : 'bg-white border border-gray-200 hover:border-gray-300'
-          }`}
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <div
-              className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm"
-              style={{ backgroundColor: metric.color }}
-            >
-              <img src={metric.icon} alt={metric.title} className="w-5 h-5 md:w-6 md:h-6" />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div
-                className={`text-xs md:text-sm font-semibold truncate ${
-                  theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
-                }`}
-              >
-                <span className="md:hidden">{metric.shortTitle}</span>
-                <span className="hidden md:inline">{metric.title}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-baseline gap-2 mb-1 md:mb-2 min-w-0">
-            <span
-              className={`font-bold leading-none flex-shrink truncate ${
-                isDeviceOffline && selectedDevice
-                  ? theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
-                  : theme === 'dark' ? 'text-white' : 'text-gray-900'
-              }`}
-              style={{ fontSize: `${getValueFontSize(idx, metric.value)}px` }}
-            >
-              {metric.value}
-            </span>
-            <span
-              className={`flex-shrink-0 leading-none ${
-                theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
-              }`}
-              style={{ fontSize: `${getUnitFontSize(idx)}px` }}
-            >
-              {metric.unit}
-            </span>
-          </div>
+    <div className="">
+      <GridLayout
+        className="w-full"
+        layout={layout}
+        cols={4}
+        rowHeight={130}
+        width={1500}
+        isDraggable={false}
+        isResizable={false}
+        compactType={null}
+        preventCollision={true}
+      >
+        <div key="ofr" data-grid={{ i: 'ofr', x: 0, y: 0, w: 1, h: 1 }}>
+          {renderMetricCard(metrics[0])}
         </div>
-      ))}
-
-      {showLastRefresh && (
-        <div
-          ref={(el) => (cardRefs.current[3] = el)}
-          className={`rounded-lg p-3 md:p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 ${
-            theme === 'dark' ? 'bg-[#162345] border border-gray-700/30 hover:border-gray-600/50' : 'bg-white border border-gray-200 hover:border-gray-300'
-          } ${
-            isRefreshing ? `ring-2 ring-blue-400 ring-opacity-50 shadow-lg ${theme === 'dark' ? 'shadow-blue-500/30' : 'shadow-blue-400/20'}` : ''
-          }`}
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <div
-              className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center shrink-0 shadow-sm"
-              style={{ backgroundColor: lastRefreshConfig.color || '#d82e75' }}
-            >
-              <AlarmClock className="w-4 h-4 md:w-5 md:h-5 text-white" />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div
-                className={`text-xs md:text-sm font-semibold truncate ${
-                  theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
-                }`}
-              >
-                Last Refresh
-              </div>
-              <div
-                className={`text-xs mt-0.5 hidden md:block truncate ${
-                  theme === 'dark' ? 'text-[#A2AED4]' : 'text-gray-500'
-                }`}
-              >
-                {lastRefreshLabel}
-              </div>
-            </div>
-
-            <div className="ml-1 md:ml-2 flex items-center shrink-0">
-              {isRefreshing && (
-                <RefreshCw
-                  className={`w-3 h-3 md:w-4 md:h-4 animate-spin ${
-                    theme === 'dark' ? 'text-blue-400' : 'text-blue-500'
-                  }`}
-                />
-              )}
-            </div>
-          </div>
-
-          <div className="mt-1 md:mt-2 min-w-0">
-            <div
-              className={`font-semibold leading-none truncate ${
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
-              }`}
-              style={{ fontSize: `${getValueFontSize(3, formattedLastRefresh)}px` }}
-            >
-              {formattedLastRefresh}
-            </div>
-            <div
-              className={`text-xs mt-1 truncate ${
-                theme === 'dark' ? 'text-[#D0CCD8]' : 'text-[#555758]'
-              }`}
-            >
-              {lastRefresh
-                ? new Date(lastRefresh).toLocaleDateString('en-GB')
-                : ''}
-            </div>
-          </div>
+        <div key="wfr" data-grid={{ i: 'wfr', x: 1, y: 0, w: 1, h: 1 }}>
+          {renderMetricCard(metrics[1])}
         </div>
-      )}
+        <div key="gfr" data-grid={{ i: 'gfr', x: 2, y: 0, w: 1, h: 1 }}>
+          {renderMetricCard(metrics[2])}
+        </div>
+        <div key="refresh" data-grid={{ i: 'refresh', x: 3, y: 0, w: 1, h: 1 }}>
+          {renderLastRefreshCard()}
+        </div>
+      </GridLayout>
     </div>
   );
 };

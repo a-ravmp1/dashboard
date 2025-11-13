@@ -165,29 +165,18 @@ const DynamicDashboard: React.FC<DynamicDashboardProps> = ({
             <div
               key={layout.i}
               className={`rounded-lg overflow-hidden shadow-sm transition-all duration-300 ${
-                isEditable
-                  ? theme === 'dark'
-                    ? 'ring-2 ring-blue-500/30 bg-[#0B1437] hover:ring-blue-500/50'
-                    : 'ring-2 ring-blue-400/20 bg-white hover:ring-blue-400/40'
-                  : theme === 'dark'
-                  ? 'bg-[#0B1437]'
-                  : 'bg-white'
+                theme === 'dark'
+                  ? 'bg-[#162345]'
+                  : 'bg-white border border-gray-200'
               }`}
               style={{
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
             >
               {isEditable && (
-                <div className="drag-handle absolute top-0 left-0 right-0 h-8 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 bg-opacity-95 cursor-move flex items-center justify-between px-3 z-10 group hover:bg-opacity-100 transition-all shadow-md">
-                  <div className="flex gap-1.5 opacity-70 group-hover:opacity-100 transition-opacity">
-                    <div className="w-1.5 h-3.5 bg-white rounded-sm"></div>
-                    <div className="w-1.5 h-3.5 bg-white rounded-sm"></div>
-                    <div className="w-1.5 h-3.5 bg-white rounded-sm"></div>
-                  </div>
-                  <span className="text-xs font-semibold text-white opacity-75">Drag to move</span>
-                </div>
+                <div className="drag-handle absolute top-0 left-0 h-full w-1 bg-gradient-to-b from-blue-500 to-blue-600 cursor-move z-10 hover:w-1.5 transition-all"></div>
               )}
-              <div className={`h-full ${isEditable ? 'pt-8' : ''}`}>
+              <div className={`h-full`}>
                 {children(widget)}
               </div>
             </div>

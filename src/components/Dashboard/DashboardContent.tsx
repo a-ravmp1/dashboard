@@ -7,7 +7,7 @@ import { apiService, DeviceChartData, HierarchyChartData, Device } from '../../s
 import DynamicDashboard from './DynamicDashboard';
 import WidgetRenderer from './WidgetRenderer';
 import AddWidgetModal from './AddWidgetModal';
-import { Calendar, ChevronDown, Check, Plus } from 'lucide-react';
+import { Calendar, ChevronDown, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 
@@ -452,62 +452,45 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
 
   return (
     <div
-      className={`h-full overflow-y-auto transition-colors duration-300 ${
+      className={`h-full p-4 overflow-y-auto ${
         theme === 'dark' ? 'bg-[#0b1326]' : 'bg-gray-50'
       }`}
     >
       {children || (
         <>
-          <div className="p-4 md:p-6">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-              <div className="flex items-center gap-4">
-                <div>
-                  <h1
-                    className={`text-2xl md:text-3xl font-semibold tracking-tight ${
-                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <h1
+                className={`text-3xl font-semibold md:tracking-wide ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}
+              >
+                {selectedHierarchy &&
+                selectedHierarchy.id !== selectedHierarchy.name
+                  ? `${selectedHierarchy.name} Dashboard`
+                  : selectedDevice
+                  ? `Device ${
+                      selectedDevice.serial_number ||
+                      selectedDevice.deviceSerial
+                    } Dashboard`
+                  : 'Production Dashboard'}
+              </h1>
+              {isLoading && (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                  <span
+                    className={`text-sm ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                     }`}
                   >
-                    {selectedHierarchy &&
-                    selectedHierarchy.id !== selectedHierarchy.name
-                      ? `${selectedHierarchy.name} Dashboard`
-                      : selectedDevice
-                      ? `Device ${
-                          selectedDevice.serial_number ||
-                          selectedDevice.deviceSerial
-                        } Dashboard`
-                      : 'Production Dashboard'}
-                  </h1>
+                    Loading...
+                  </span>
                 </div>
-                {isLoading && (
-                  <div className="flex items-center gap-2 ml-4">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                    <span
-                      className={`text-sm ${
-                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                      }`}
-                    >
-                      Loading...
-                    </span>
-                  </div>
-                )}
-              </div>
+              )}
+            </div>
 
-              <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                {userRole === 'admin' && editMode && (
-                  <motion.button
-                    onClick={() => setShowAddWidgetModal(true)}
-                    whileTap={{ scale: 0.95 }}
-                    className={`flex items-center gap-2 rounded-lg px-3 md:px-4 py-2 text-sm font-medium transition-all hover:shadow-md ${
-                      theme === 'dark'
-                        ? 'bg-blue-600 text-white hover:bg-blue-700'
-                        : 'bg-blue-500 text-white hover:bg-blue-600'
-                    }`}
-                  >
-                    <Plus className="h-4 w-4" />
-                    <span className="hidden sm:inline">Add Widget</span>
-                  </motion.button>
-                )}
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <AnimatedSelect
                   value={timeRange}
                   onChange={handleTimeRangeChange}
@@ -517,99 +500,76 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                   }))}
                   theme={theme}
                 />
-                {userRole === 'admin' && (
-                  <motion.button
-                    onClick={() => setEditMode(!editMode)}
-                    whileTap={{ scale: 0.95 }}
-                    className={`px-3 md:px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 hover:shadow-md ${
-                      editMode
-                        ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-600/30'
-                        : theme === 'dark'
-                        ? 'bg-[#162345] text-white hover:bg-[#1f2d4d]'
-                        : 'bg-white border border-gray-300 text-gray-800 hover:bg-gray-100'
-                    }`}
-                  >
-                    {editMode ? 'Save Layout' : 'Edit Layout'}
-                  </motion.button>
-                )}
               </div>
-            </div>
 
-            {/* Canvas Container */}
+              {userRole === 'admin' && (
+                <motion.button
+                  onClick={() => setEditMode(!editMode)}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
+                    editMode
+                      ? 'bg-green-600 text-white'
+                      : theme === 'dark'
+                      ? 'bg-[#6656F5] text-white hover:bg-[#4c3af5]'
+                      : 'bg-white border border-gray-300 text-gray-800 hover:bg-gray-100'
+                  }`}
+                >
+                  {editMode ? 'Save Layout' : 'Edit Layout'}
+                </motion.button>
+              )}
+            </div>
+          </div>
+
+          <div
+            className={`relative rounded-md p-4 transition-all duration-300 ${
+              editMode
+                ? 'border-2 border-white border-dotted p-4 bg-[#6872DB]'
+                : ''
+            }`}
+          >
+            {editMode && (
+              <div className="">
+                <button
+                  onClick={() => setShowAddWidgetModal(true)}
+                  className="bg-[#162345] text-white text-sm px-3 py-3 rounded-sm"
+                >
+                  + Add New Widget
+                </button>
+              </div>
+            )}
+
             {widgetsLoaded ? (
-              <motion.div
-                className={`rounded-lg transition-all duration-300 ${
-                  editMode
-                    ? `border-2 border-dashed p-4 md:p-6 ${
-                        theme === 'dark'
-                          ? 'border-[#6872DB] border-opacity-50 bg-[#6872DB] bg-opacity-5'
-                          : 'border-[#6872DB] border-opacity-40 bg-[#6872DB] bg-opacity-3'
-                      }`
-                    : 'p-0'
-                }`}
-                initial={false}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                {widgets.length > 0 ? (
-                  <div style={{ width: '100%' }}>
-                    <DynamicDashboard
-                      dashboardId={dashboardConfig?.id || 'default'}
-                      widgets={widgets}
-                      isEditable={editMode}
-                    >
-                      {(widget) => (
-                        <WidgetRenderer
-                          widget={widget}
-                          chartData={widget.component === 'FlowRateChart' ? flowRateChartData : metricsChartData}
-                          hierarchyChartData={widget.component === 'FlowRateChart' ? flowRateHierarchyChartData : metricsHierarchyChartData}
-                          timeRange={timeRange as '1day' | '7days' | '1month'}
-                          lastRefresh={lastRefresh}
-                          isDeviceOffline={metricsChartData?.device?.status === 'Offline'}
-                          selectedDevice={selectedDevice}
-                          selectedHierarchy={selectedHierarchy}
-                          isAdmin={userRole === 'admin' && editMode}
-                          onDelete={handleDeleteWidget}
-                        />
-                      )}
-                    </DynamicDashboard>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <p
-                      className={`text-lg ${
-                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                      }`}
-                    >
-                      No widgets configured for this dashboard
-                    </p>
-                    {userRole === 'admin' && editMode && (
-                      <motion.button
-                        onClick={() => setShowAddWidgetModal(true)}
-                        whileTap={{ scale: 0.95 }}
-                        className={`mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-all hover:shadow-md ${
-                          theme === 'dark'
-                            ? 'bg-blue-600 text-white hover:bg-blue-700'
-                            : 'bg-blue-500 text-white hover:bg-blue-600'
-                        }`}
-                      >
-                        <Plus className="h-4 w-4" />
-                        Add Widget
-                      </motion.button>
-                    )}
-                  </div>
-                )}
-              </motion.div>
+              <div style={{ width: '100%' }}>
+                <DynamicDashboard
+                  dashboardId={dashboardConfig?.id || 'default'}
+                  widgets={widgets}
+                  isEditable={editMode}
+                >
+                  {(widget) => (
+                    <WidgetRenderer
+                      widget={widget}
+                      chartData={widget.component === 'FlowRateChart' ? flowRateChartData : metricsChartData}
+                      hierarchyChartData={widget.component === 'FlowRateChart' ? flowRateHierarchyChartData : metricsHierarchyChartData}
+                      timeRange={timeRange as '1day' | '7days' | '1month'}
+                      lastRefresh={lastRefresh}
+                      isDeviceOffline={metricsChartData?.device?.status === 'Offline'}
+                      selectedDevice={selectedDevice}
+                      selectedHierarchy={selectedHierarchy}
+                      isAdmin={userRole === 'admin' && editMode}
+                      onDelete={handleDeleteWidget}
+                    />
+                  )}
+                </DynamicDashboard>
+              </div>
             ) : null}
+          </div>
 
-            {/* Version Info */}
-            <div
-              className={`text-center py-4 text-xs mt-6 ${
-                theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
-              }`}
-            >
-              Version 1.0.0
-            </div>
+          <div
+            className={`text-center py-4 text-xs ${
+              theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+            }`}
+          >
+            Version 1.0.0
           </div>
         </>
       )}

@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Check } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../hooks/useAuth';
+import {
+  LineChart,
+  Line,
+  ScatterChart,
+  Scatter,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 
 interface DeviceType {
   id: number;
@@ -32,12 +51,26 @@ interface AddWidgetModalProps {
   onSuccess: () => void;
 }
 
+const dummyData = [
+  { time: '14:25:38', s1: 4000, s2: 2400, s3: 2400 },
+  { time: '14:29:38', s1: 3000, s2: 1398, s3: 2210 },
+  { time: '14:35:32', s1: 2000, s2: 9800, s3: 2290 },
+  { time: '14:39:12', s1: 2780, s2: 3908, s3: 2000 },
+  { time: '14:53:54', s1: 1890, s2: 4800, s3: 2181 },
+  { time: '14:55:44', s1: 2390, s2: 3800, s3: 2500 },
+];
+
+const COLORS = ['#7B61FF', '#4FC3F7', '#EC4899', '#10B981', '#F59E0B'];
+
 const AddWidgetModal: React.FC<AddWidgetModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { theme } = useTheme();
   const { token } = useAuth();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [chartType, setChartType] = useState<'line' | 'scatter' | 'area' | 'bar' | 'pie'>('line');
+  const [showGrid, setShowGrid] = useState(true);
+  const [showDots, setShowDots] = useState(true);
 
   const [deviceTypes, setDeviceTypes] = useState<DeviceType[]>([]);
   const [widgetTypes, setWidgetTypes] = useState<WidgetType[]>([]);
@@ -170,265 +203,239 @@ const AddWidgetModal: React.FC<AddWidgetModalProps> = ({ isOpen, onClose, onSucc
 
   if (!isOpen) return null;
 
+  const bg = theme === 'dark' ? 'bg-[#0b1326] text-white' : 'bg-white text-gray-900';
+  const border = theme === 'dark' ? 'border-white/10' : 'border-gray-300';
+
+  const renderPreview = () => {
+    switch (chartType) {
+      case 'scatter':
+        return (
+          <ScatterChart data={dummyData}>
+            {showGrid && <CartesianGrid strokeDasharray="3 3" />}
+            <XAxis dataKey="time" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Scatter name="Series 1" data={dummyData} fill={COLORS[0]} />
+            <Scatter name="Series 2" data={dummyData} fill={COLORS[1]} />
+            <Scatter name="Series 3" data={dummyData} fill={COLORS[2]} />
+          </ScatterChart>
+        );
+      case 'area':
+        return (
+          <AreaChart data={dummyData}>
+            {showGrid && <CartesianGrid strokeDasharray="3 3" />}
+            <XAxis dataKey="time" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Area
+              type="monotone"
+              dataKey="s1"
+              stackId="1"
+              stroke={COLORS[0]}
+              fill={COLORS[0]}
+              fillOpacity={0.5}
+            />
+            <Area
+              type="monotone"
+              dataKey="s2"
+              stackId="1"
+              stroke={COLORS[1]}
+              fill={COLORS[1]}
+              fillOpacity={0.5}
+            />
+            <Area
+              type="monotone"
+              dataKey="s3"
+              stackId="1"
+              stroke={COLORS[2]}
+              fill={COLORS[2]}
+              fillOpacity={0.5}
+            />
+          </AreaChart>
+        );
+      case 'bar':
+        return (
+          <BarChart data={dummyData}>
+            {showGrid && <CartesianGrid strokeDasharray="3 3" />}
+            <XAxis dataKey="time" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="s1" fill={COLORS[0]} />
+            <Bar dataKey="s2" fill={COLORS[1]} />
+            <Bar dataKey="s3" fill={COLORS[2]} />
+          </BarChart>
+        );
+      case 'pie':
+        return (
+          <PieChart>
+            <Tooltip />
+            <Pie data={dummyData} dataKey="s1" nameKey="time" outerRadius={100}>
+              {dummyData.map((_, i) => (
+                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              ))}
+            </Pie>
+          </PieChart>
+        );
+      default:
+        return (
+          <LineChart data={dummyData}>
+            {showGrid && <CartesianGrid strokeDasharray="3 3" />}
+            <XAxis dataKey="time" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line
+              type="monotone"
+              dataKey="s1"
+              stroke={COLORS[0]}
+              dot={showDots}
+            />
+            <Line
+              type="monotone"
+              dataKey="s2"
+              stroke={COLORS[1]}
+              dot={showDots}
+            />
+            <Line
+              type="monotone"
+              dataKey="s3"
+              stroke={COLORS[2]}
+              dot={showDots}
+            />
+          </LineChart>
+        );
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div
-        className={`relative w-full max-w-3xl rounded-lg shadow-2xl transition-all ${
-          theme === 'dark' ? 'bg-[#0B1437]' : 'bg-white'
-        }`}
+        className={`w-[90%] max-w-5xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl border ${border} ${bg} p-6 relative`}
       >
-        <div className={`flex items-center justify-between border-b p-6 ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'}`}>
-          <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            Add New Widget
-          </h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg font-semibold">Charts</h2>
           <button
             onClick={handleClose}
-            className={`rounded-lg p-2 transition-all hover:scale-110 ${
-              theme === 'dark' ? 'hover:bg-gray-700/50' : 'hover:bg-gray-100'
-            }`}
+            className="p-1 rounded-full hover:bg-white/10 transition"
+            aria-label="Close"
           >
-            <X className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} w-5 h-5`} />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6">
-          <div className="mb-6 flex items-center justify-center space-x-4">
-            {[
-              { num: 1, label: 'Device' },
-              { num: 2, label: 'Widget Type' },
-              { num: 3, label: 'Properties' }
-            ].map((s, idx) => (
-              <React.Fragment key={s.num}>
-                <div className="flex flex-col items-center">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-full font-semibold transition-all ${
-                      step >= s.num
-                        ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
-                        : theme === 'dark'
-                        ? 'bg-gray-700 text-gray-400'
-                        : 'bg-gray-200 text-gray-500'
-                    }`}
-                  >
-                    {step > s.num ? <Check className="h-5 w-5" /> : s.num}
-                  </div>
-                  <span className={`mt-2 text-xs font-medium transition-colors ${
-                    step >= s.num
-                      ? 'text-blue-500'
-                      : theme === 'dark'
-                      ? 'text-gray-500'
-                      : 'text-gray-400'
-                  }`}>
-                    {s.label}
-                  </span>
-                </div>
-                {idx < 2 && (
-                  <div
-                    className={`h-1 w-16 mt-0 mb-6 transition-colors ${
-                      step > s.num
-                        ? 'bg-blue-500'
-                        : theme === 'dark'
-                        ? 'bg-gray-700'
-                        : 'bg-gray-200'
-                    }`}
-                  />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-
-          {error && (
-            <div className="mb-4 rounded-lg bg-red-500 bg-opacity-10 border border-red-500 p-3 text-red-500">
-              {error}
-            </div>
-          )}
-
-          {step === 1 && (
-            <div>
-              <h3 className={`mb-4 text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                Step 1: Select Device Type
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                {deviceTypes.map((dt) => (
-                  <button
-                    key={dt.id}
-                    onClick={() => setSelectedDeviceType(dt.id)}
-                    className={`rounded-lg border-2 p-4 text-left transition-all ${
-                      selectedDeviceType === dt.id
-                        ? 'border-blue-500 bg-blue-500 bg-opacity-10'
-                        : theme === 'dark'
-                        ? 'border-gray-700 hover:border-gray-600'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className={`text-lg font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      {dt.typeName}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div>
-              <h3 className={`mb-4 text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                Step 2: Select Widget Type
-              </h3>
-              <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Choose the visualization type for your widget. Line Chart is recommended for time-series data.
-              </p>
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-4">
-                  {widgetTypes.filter(wt => wt.name === 'line_chart').map((wt) => (
-                    <button
-                      key={wt.id}
-                      onClick={() => setSelectedWidgetType(wt.id)}
-                      className={`rounded-lg border-2 p-4 text-left transition-all ${
-                        selectedWidgetType === wt.id
-                          ? 'border-blue-500 bg-blue-500 bg-opacity-10'
-                          : theme === 'dark'
-                          ? 'border-gray-700 hover:border-gray-600'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className={`text-lg font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        {wt.displayName}
-                      </div>
-                      <div className={`text-sm mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Display data over time with interactive charts
-                      </div>
-                    </button>
-                  ))}
-                  {widgetTypes.filter(wt => wt.name === 'line_chart').length === 0 && (
-                    <div className={`col-span-2 text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      No widget types available
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {step === 3 && (
-            <div>
-              <h3 className={`mb-4 text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                Step 3: Select Properties to Display
-              </h3>
-              <div className="mb-4">
-                <label className={`mb-2 block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Widget Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={widgetName}
-                  onChange={(e) => setWidgetName(e.target.value)}
-                  placeholder="Enter custom widget name"
-                  className={`w-full rounded-lg border px-4 py-2 ${
-                    theme === 'dark'
-                      ? 'border-gray-700 bg-gray-800 text-white'
-                      : 'border-gray-300 bg-white text-gray-900'
-                  }`}
-                />
-              </div>
-              <div className="max-h-64 overflow-y-auto space-y-2">
-                {properties.map((prop) => (
-                  <button
-                    key={prop.id}
-                    onClick={() => handlePropertyToggle(prop.id)}
-                    className={`flex w-full items-center justify-between rounded-lg border-2 p-3 text-left transition-all ${
-                      selectedProperties.includes(prop.id)
-                        ? 'border-blue-500 bg-blue-500 bg-opacity-10'
-                        : theme === 'dark'
-                        ? 'border-gray-700 hover:border-gray-600'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div>
-                      <div className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        {prop.name}
-                      </div>
-                      <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {prop.unit} - {prop.dataType}
-                      </div>
-                    </div>
-                    {selectedProperties.includes(prop.id) && (
-                      <Check className="h-5 w-5 text-blue-500" />
-                    )}
-                  </button>
-                ))}
-              </div>
-              <div className={`mt-3 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Selected: {selectedProperties.length} {selectedProperties.length === 1 ? 'property' : 'properties'}
-              </div>
-            </div>
-          )}
+        <div className="flex gap-4 mb-6 text-sm font-medium border-b border-gray-700/30 pb-2">
+          {['line', 'scatter', 'area', 'bar', 'pie'].map((type) => (
+            <button
+              key={type}
+              onClick={() => setChartType(type as any)}
+              className={`px-3 py-1 rounded-md transition ${
+                chartType === type
+                  ? theme === 'dark'
+                    ? 'bg-[#162345] text-white'
+                    : 'bg-blue-100 text-blue-700'
+                  : 'text-gray-400 hover:text-white/90'
+              }`}
+            >
+              {type === 'pie'
+                ? 'Pie/Doughnut'
+                : type.charAt(0).toUpperCase() + type.slice(1)}
+            </button>
+          ))}
         </div>
 
-        <div className={`flex items-center justify-between border-t p-6 ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+        <div className="grid md:grid-cols-3 gap-6 mb-6 text-sm">
+          <div>
+            <label className="block mb-2 opacity-80">Device</label>
+            <input
+              className={`w-full px-3 py-2 rounded-md border ${border} bg-transparent`}
+              placeholder="Name of device"
+            />
+          </div>
+          <div>
+            <label className="block mb-2 opacity-80">No of series</label>
+            <select
+              className={`w-full px-3 py-2 rounded-md border ${border} bg-transparent`}
+            >
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block mb-2 opacity-80">Names of property</label>
+            <div className="grid grid-cols-3 gap-2">
+              <input
+                className={`px-2 py-2 rounded-md border ${border} bg-transparent`}
+                placeholder="Series 1"
+              />
+              <input
+                className={`px-2 py-2 rounded-md border ${border} bg-transparent`}
+                placeholder="Series 2"
+              />
+              <input
+                className={`px-2 py-2 rounded-md border ${border} bg-transparent`}
+                placeholder="Series 3"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-6 mb-6 text-sm">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={!showGrid}
+              onChange={() => setShowGrid((prev) => !prev)}
+            />
+            Hide grid
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={!showDots}
+              onChange={() => setShowDots((prev) => !prev)}
+            />
+            Hide dots
+          </label>
+        </div>
+
+        <div
+          className="rounded-lg border p-4 overflow-hidden"
+          style={{ height: 300 }}
+        >
+          <h3 className="text-sm mb-2 font-medium opacity-80">Preview</h3>
+          <ResponsiveContainer width="100%" height="100%">
+            {renderPreview()}
+          </ResponsiveContainer>
+        </div>
+
+        <div className="mt-6 flex gap-3 justify-end">
           <button
-            onClick={() => setStep(Math.max(1, step - 1))}
-            disabled={step === 1}
+            onClick={handleClose}
             className={`rounded-lg px-6 py-2 font-medium transition-colors ${
-              step === 1
-                ? 'cursor-not-allowed opacity-50'
-                : theme === 'dark'
+              theme === 'dark'
                 ? 'bg-gray-700 text-white hover:bg-gray-600'
                 : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
             }`}
           >
-            Back
+            Cancel
           </button>
-          <div className="flex gap-3">
-            <button
-              onClick={handleClose}
-              className={`rounded-lg px-6 py-2 font-medium transition-colors ${
-                theme === 'dark'
-                  ? 'bg-gray-700 text-white hover:bg-gray-600'
-                  : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
-              }`}
-            >
-              Cancel
-            </button>
-            {step < 3 ? (
-              <button
-                onClick={() => setStep(step + 1)}
-                disabled={!canProceed() || loading}
-                className={`rounded-lg px-6 py-2 font-medium transition-colors ${
-                  !canProceed() || loading
-                    ? 'cursor-not-allowed opacity-50'
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
-                }`}
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                onClick={handleCreateWidget}
-                disabled={!canProceed() || loading}
-                className={`flex items-center gap-2 rounded-lg px-6 py-2 font-medium transition-colors ${
-                  !canProceed() || loading
-                    ? 'cursor-not-allowed opacity-50'
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
-                }`}
-              >
-                {loading ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4" />
-                    Create Widget
-                  </>
-                )}
-              </button>
-            )}
-          </div>
+          <button
+            onClick={handleCreateWidget}
+            disabled={loading}
+            className={`rounded-lg px-6 py-2 font-medium transition-colors ${
+              loading
+                ? 'cursor-not-allowed opacity-50'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+            }`}
+          >
+            {loading ? 'Creating...' : 'Create Widget'}
+          </button>
         </div>
       </div>
     </div>

@@ -12,6 +12,9 @@ import { ExternalLink, Info, MoreHorizontal, X } from 'lucide-react';
 import { DeviceChartData, HierarchyChartData } from '../../services/api';
 import { useTheme } from '../../hooks/useTheme';
 import ChartModal from '../Charts/ChartModel';
+import GridLayout, { Layout } from 'react-grid-layout';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 
 interface FlowRateChartsProps {
   chartData?: DeviceChartData | null;
@@ -324,11 +327,27 @@ const FlowRateCharts: React.FC<FlowRateChartsProps> = ({ chartData, hierarchyCha
   const wfrConfig = getChartConfig('wfr');
   const gfrConfig = getChartConfig('gfr');
 
+  const layout: Layout[] = [
+    { i: 'ofr', x: 0, y: 0, w: 2, h: 1 },
+    { i: 'wfr', x: 1, y: 0, w: 2, h: 1 },
+    { i: 'gfr', x: 2, y: 0, w: 2, h: 1 },
+  ];
+
   return (
     <>
-      <div className="w-full space-y-4">
+      <GridLayout
+        className="w-full"
+        layout={layout}
+        cols={3}
+        rowHeight={265}
+        width={1500}
+        isDraggable={false}
+        isResizable={false}
+        compactType={null}
+        preventCollision={true}
+      >
         {ofrConfig && (
-          <div className="relative h-full">
+          <div key="ofr" data-grid={{ i: 'ofr', x: 0, y: 0, w: 1, h: 1 }} className="relative h-full">
             <FlowRateChart
               title={ofrConfig.dataSourceConfig?.title || "OFR"}
               unit={ofrConfig.dataSourceConfig?.unit || "l/min"}
@@ -355,7 +374,7 @@ const FlowRateCharts: React.FC<FlowRateChartsProps> = ({ chartData, hierarchyCha
           </div>
         )}
         {wfrConfig && (
-          <div className="relative h-full">
+          <div key="wfr" data-grid={{ i: 'wfr', x: 1, y: 0, w: 1, h: 1 }} className="relative h-full">
             <FlowRateChart
               title={wfrConfig.dataSourceConfig?.title || "WFR"}
               unit={wfrConfig.dataSourceConfig?.unit || "l/min"}
@@ -382,7 +401,7 @@ const FlowRateCharts: React.FC<FlowRateChartsProps> = ({ chartData, hierarchyCha
           </div>
         )}
         {gfrConfig && (
-          <div className="relative h-full">
+          <div key="gfr" data-grid={{ i: 'gfr', x: 2, y: 0, w: 1, h: 1 }} className="relative h-full">
             <FlowRateChart
               title={gfrConfig.dataSourceConfig?.title || "GFR"}
               unit={gfrConfig.dataSourceConfig?.unit || "l/min"}
@@ -408,7 +427,7 @@ const FlowRateCharts: React.FC<FlowRateChartsProps> = ({ chartData, hierarchyCha
             )}
           </div>
         )}
-      </div>
+      </GridLayout>
 
       <ChartModal
         isOpen={modalOpen === 'ofr'}
